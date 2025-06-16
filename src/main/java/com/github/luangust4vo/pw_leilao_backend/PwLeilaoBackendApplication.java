@@ -9,5 +9,4 @@ public class PwLeilaoBackendApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(PwLeilaoBackendApplication.class, args);
 	}
-
 }
