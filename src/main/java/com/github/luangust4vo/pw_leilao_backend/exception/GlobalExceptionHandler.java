@@ -47,7 +47,18 @@ public class GlobalExceptionHandler {
         ErrorResponse errorResponse = new ErrorResponse(
                 HttpStatus.NOT_FOUND.value(),
                 "Internal Server Error",
-                ex.getMessage(),
+                "Resource not found",
+                request.getDescription(false),
+                null);
+        return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(BusinessException.class)
+    public ResponseEntity<ErrorResponse> businessException(BusinessException ex, WebRequest request) {
+        ErrorResponse errorResponse = new ErrorResponse(
+                HttpStatus.UNPROCESSABLE_ENTITY.value(),
+                "Business Rule Violation",
+                "Business rule violation",
                 request.getDescription(false),
                 null);
         return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
