@@ -8,10 +8,9 @@ import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Service;
 
+import com.github.luangust4vo.pw_leilao_backend.exception.NotFoundException;
 import com.github.luangust4vo.pw_leilao_backend.models.Person;
 import com.github.luangust4vo.pw_leilao_backend.repositories.PersonRepository;
-
-import jakarta.transaction.Transactional;
 
 @Service
 public class PersonService {
@@ -22,7 +21,7 @@ public class PersonService {
 
     public Person findById(Long id) {
         return personRepository.findById(id)
-                .orElseThrow(() -> new NoSuchElementException(
+                .orElseThrow(() -> new NotFoundException(
                         messageSource.getMessage("person.not-found", new Object[] { id },
                                 LocaleContextHolder.getLocale())));
     }
