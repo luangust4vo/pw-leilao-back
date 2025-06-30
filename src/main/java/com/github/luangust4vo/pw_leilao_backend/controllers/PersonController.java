@@ -3,6 +3,8 @@ package com.github.luangust4vo.pw_leilao_backend.controllers;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,8 +27,8 @@ public class PersonController {
     private PersonService personService;
 
     @GetMapping
-    public ResponseEntity<List<Person>> findAll() {
-        return ResponseEntity.ok(personService.findAll());
+    public ResponseEntity<Page<Person>> findAll(Pageable pageable) {
+        return ResponseEntity.ok(personService.findAll(pageable));
     }
 
     @PostMapping

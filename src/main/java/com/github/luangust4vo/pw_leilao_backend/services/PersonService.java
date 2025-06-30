@@ -6,6 +6,8 @@ import java.util.NoSuchElementException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.github.luangust4vo.pw_leilao_backend.exception.NotFoundException;
@@ -26,8 +28,8 @@ public class PersonService {
                                 LocaleContextHolder.getLocale())));
     }
 
-    public List<Person> findAll() {
-        return personRepository.findAll();
+    public Page<Person> findAll(Pageable pageable) {
+        return personRepository.findAll(pageable);
     }
 
     public Person create(Person person) {
