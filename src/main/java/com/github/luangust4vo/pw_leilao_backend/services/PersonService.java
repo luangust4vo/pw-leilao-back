@@ -1,8 +1,5 @@
 package com.github.luangust4vo.pw_leilao_backend.services;
 
-import java.util.List;
-import java.util.NoSuchElementException;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
@@ -20,6 +17,8 @@ public class PersonService {
     private PersonRepository personRepository;
     @Autowired
     private MessageSource messageSource;
+    @Autowired
+    private EmailService emailService;
 
     public Person findById(Long id) {
         return personRepository.findById(id)
@@ -33,7 +32,10 @@ public class PersonService {
     }
 
     public Person create(Person person) {
-        return personRepository.save(person);
+        Person newPerson = personRepository.save(person);
+        emailService.sendSimpleMail(person.getEmail() , "Teste", "Teste");
+
+        return newPerson;
     }
 
     public Person update(Person person) {
