@@ -6,10 +6,12 @@ import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.thymeleaf.context.Context;
 
 import com.github.luangust4vo.pw_leilao_backend.exception.NotFoundException;
 import com.github.luangust4vo.pw_leilao_backend.models.Person;
 import com.github.luangust4vo.pw_leilao_backend.repositories.PersonRepository;
+import com.github.luangust4vo.pw_leilao_backend.utils.Const;
 
 @Service
 public class PersonService {
@@ -19,6 +21,12 @@ public class PersonService {
     private MessageSource messageSource;
     @Autowired
     private EmailService emailService;
+
+    private void sendSuccessEmail(Person person) {
+        Context context = new Context(LocaleContextHolder.getLocale());
+        context.setVariable("name", person.getName());
+        emailService.emailTempalte(person.getEmail(), "Cadastrado com sucesso", Const.templateSuccessRegister, context);
+    }
 
     public Person findById(Long id) {
         return personRepository.findById(id)
@@ -33,7 +41,7 @@ public class PersonService {
 
     public Person create(Person person) {
         Person newPerson = personRepository.save(person);
-        emailService.sendSimpleMail(person.getEmail() , "Teste", "Teste");
+        sendSuccessEmail(newPerson);
 
         return newPerson;
     }
