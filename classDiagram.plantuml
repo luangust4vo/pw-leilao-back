@@ -1,0 +1,88 @@
+@startuml
+
+enum StatusLeilao {
+    ABERTO
+    ENCERRADO
+    CANCELADO
+    EM_ANALISE
+}
+
+enum TipoPerfil {
+    ADMIN
+    COMPRADOR
+    VENDEDOR
+}
+
+class Pessoa {
+    - nome: String
+    - email: String
+    - senha: String
+    - codigoValidacao: String
+    - validadeCodigoValidacao: Date
+    - ativo: Boolean
+    - fotoPerfil: Lob
+}
+
+class Perfil {
+    - tipo: TipoPerfil
+}
+
+class PessoaPerfil {
+}
+
+class Categoria {
+    - nome: String
+    - observacao: String
+}
+
+class Leilao {
+    - titulo: String
+    - descricao: String
+    - descricaoDetalhada: String
+    - dataHoraInicio: DateTime
+    - dataHoraFim: DateTime
+    - status: StatusLeilao
+    - observacao: String
+    - valorIncremento: Float
+    - lanceMinimo: Float
+}
+
+class Imagem {
+    - dataHoraCadastro: DateTime
+    - nomeImagem: String
+}
+
+class Lance {
+    - valorLance: Float
+    - dataHora: DateTime
+}
+
+class Feedback {
+    - comentario: String
+    - nota: Integer
+    - dataHora: DateTime
+}
+
+class Pagamento {
+    - valor: Float
+    - dataHora: DateTime
+    - status: String
+}
+
+' ==== Relacionamentos ====
+
+Pessoa "0..*" <-> "1..*" Perfil
+(Pessoa, Perfil) .. PessoaPerfil : classe associativa
+
+Pessoa "1" --> "0..*" Categoria : cria
+Pessoa "1" --> "0..*" Leilao : publica
+Pessoa "1" --> "0..*" Lance : realiza
+Pessoa "1" --> "0..*" Feedback : escreve
+Feedback "1" --> "1" Pessoa : destinatario
+
+Leilao "1" --> "1" Categoria
+Leilao "1" <--> "0..*" Imagem
+Leilao "1" --> "0..*" Lance
+Leilao "1" --> "0..1" Pagamento
+
+@enduml
