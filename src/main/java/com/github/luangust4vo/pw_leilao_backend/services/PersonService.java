@@ -25,7 +25,7 @@ public class PersonService {
     private void sendSuccessEmail(Person person) {
         Context context = new Context(LocaleContextHolder.getLocale());
         context.setVariable("name", person.getName());
-        emailService.emailTempalte(person.getEmail(), "Cadastrado com sucesso", Const.templateSuccessRegister, context);
+        emailService.emailTemplate(person.getEmail(), "Cadastrado com sucesso", Const.templateSuccessRegister, context);
     }
 
     public Person findById(Long id) {

@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
-import jakarta.mail.MessageRemovedException;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 
@@ -30,7 +29,7 @@ public class EmailService {
     }
 
     @Async
-    public void emailTempalte(String to, String subject, String templateName, Context context) {
+    public void emailTemplate(String to, String subject, String templateName, Context context) {
         String process = templateEngine.process(templateName, context);
         MimeMessage message = sender.createMimeMessage();
 
