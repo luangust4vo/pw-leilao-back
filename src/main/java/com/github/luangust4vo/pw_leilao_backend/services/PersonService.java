@@ -11,13 +11,18 @@ import org.thymeleaf.context.Context;
 import com.github.luangust4vo.pw_leilao_backend.dto.PersonProjection;
 import com.github.luangust4vo.pw_leilao_backend.exception.NotFoundException;
 import com.github.luangust4vo.pw_leilao_backend.models.Person;
+import com.github.luangust4vo.pw_leilao_backend.models.Profile;
+import com.github.luangust4vo.pw_leilao_backend.models.enums.ProfileType;
 import com.github.luangust4vo.pw_leilao_backend.repositories.PersonRepository;
+import com.github.luangust4vo.pw_leilao_backend.repositories.ProfileRepository;
 import com.github.luangust4vo.pw_leilao_backend.utils.Const;
 
 @Service
 public class PersonService {
     @Autowired
     private PersonRepository personRepository;
+    @Autowired
+    private ProfileRepository profileRepository;
     @Autowired
     private MessageSource messageSource;
     @Autowired
@@ -41,6 +46,12 @@ public class PersonService {
     }
 
     public Person create(Person person) {
+        Profile standardProfile = profileRepository.findByType(ProfileType.COMPRADOR).orElseThrow(() -> new NotFoundException(
+                messageSource.getMessage("profile.not-found", new Object[] { ProfileType.COMPRADOR },
+                        LocaleContextHolder.getLocale())));
+
+        person.getProfiles().add(standardProfile);
+        
         Person newPerson = personRepository.save(person);
         sendSuccessEmail(newPerson);
 
