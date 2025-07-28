@@ -8,6 +8,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.context.Context;
 
+import com.github.luangust4vo.pw_leilao_backend.dto.PersonProjection;
 import com.github.luangust4vo.pw_leilao_backend.exception.NotFoundException;
 import com.github.luangust4vo.pw_leilao_backend.models.Person;
 import com.github.luangust4vo.pw_leilao_backend.repositories.PersonRepository;
@@ -59,5 +60,16 @@ public class PersonService {
         Person existingPerson = this.findById(id);
 
         personRepository.delete(existingPerson);
+    }
+
+    public PersonProjection findPersonById(Long id) {
+        return personRepository.findPersonById(id)
+                .orElseThrow(() -> new NotFoundException(
+                        messageSource.getMessage("person.not-found", new Object[] { id },
+                                LocaleContextHolder.getLocale())));
+    }
+
+    public Page<PersonProjection> findAllPeople(Pageable pageable) {
+        return personRepository.findAllPeople(pageable);
     }
 }
