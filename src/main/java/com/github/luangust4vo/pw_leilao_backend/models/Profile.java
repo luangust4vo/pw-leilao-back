@@ -22,5 +22,5 @@ public class Profile {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "type", nullable = false, unique = true)
-    private ProfileType tipo;
+    private ProfileType type;
 }
