@@ -18,30 +18,28 @@ public class ProfileService {
     @Autowired
     private MessageSource messageSource;
 
-    public Profile findById(Long id) {
-        return profileRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException(
-                        messageSource.getMessage("profile.not-found", new Object[] { id },
-                                LocaleContextHolder.getLocale())));
-    }
-
-    public Page<Profile> findAll(Pageable pageable) {
-        return profileRepository.findAll(pageable);
-    }
-
     public Profile create(Profile profile) {
         return profileRepository.save(profile);
     }
 
     public Profile update(Profile profile) {
-        Profile existingProfile = this.findById(profile.getId());
-
+        Profile existingProfile = findById(profile.getId());
+        existingProfile.setType(profile.getType());
         return profileRepository.save(existingProfile);
     }
 
     public void delete(Long id) {
-        Profile existingProfile = this.findById(id);
-
-        profileRepository.delete(existingProfile);
+        Profile profile = findById(id);
+        profileRepository.delete(profile);
     }
+
+    public Page<Profile> findAll(Pageable page) {
+        return profileRepository.findAll(page);
+    }
+
+    public Profile findById(Long id) {
+        return profileRepository.findById(id).orElseThrow(() -> new NotFoundException(
+                messageSource.getMessage("profile.notfound", new Object[] { id }, LocaleContextHolder.getLocale())));
+    }
+
 }

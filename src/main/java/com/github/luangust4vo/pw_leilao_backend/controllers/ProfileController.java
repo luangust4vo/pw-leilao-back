@@ -19,23 +19,18 @@ import com.github.luangust4vo.pw_leilao_backend.services.ProfileService;
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/api/people")
+@RequestMapping("/api/profiles")
 public class ProfileController {
     @Autowired
     private ProfileService profileService;
 
     @GetMapping
-    public ResponseEntity<Page<Profile>> findAll(Pageable pageable) {
-        return ResponseEntity.ok(profileService.findAll(pageable));
-    }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<Profile> findById(@PathVariable("id") Long id) {
-        return ResponseEntity.ok(profileService.findById(id));
+    public ResponseEntity<Page<Profile>> findAll(Pageable page) {
+        return ResponseEntity.ok(profileService.findAll(page));
     }
 
     @PostMapping
-    public ResponseEntity<Profile> create(@Valid @RequestBody Profile profile) {
+    public ResponseEntity<Profile> insert(@Valid @RequestBody Profile profile) {
         return ResponseEntity.ok(profileService.create(profile));
     }
 
@@ -45,8 +40,9 @@ public class ProfileController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> delete(@PathVariable("id") Long id) {
+    public ResponseEntity<String> delete(@PathVariable("id") long id) {
         profileService.delete(id);
         return ResponseEntity.ok("Profile deleted successfully");
     }
+
 }

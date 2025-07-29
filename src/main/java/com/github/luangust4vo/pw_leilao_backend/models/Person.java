@@ -1,25 +1,28 @@
 package com.github.luangust4vo.pw_leilao_backend.models;
 
 import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
 import jakarta.persistence.Lob;
-import jakarta.persistence.ManyToMany;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+import lombok.AccessLevel;
 import lombok.Data;
+import lombok.Setter;
 
 @Entity
 @Data
@@ -39,12 +42,15 @@ public class Person {
     private String email;
 
     @Column(name = "password", nullable = false)
+    @NotBlank(message = "Password cannot be blank")
+    @Size(min = 8, max = 100, message = "Password must be between 8 and 100 characters")
     private String password;
 
     @Column(name = "validation_code", nullable = true, unique = true)
     private String validationCode;
 
     @Column(name = "validation_code_expiration", nullable = true)
+    @Temporal(TemporalType.TIMESTAMP)
     private Date validationCodeExpiration;
 
     @Column(name = "is_active", nullable = false)
@@ -55,18 +61,24 @@ public class Person {
     private byte[] perfilImage;
 
     @Column(name = "created_at", nullable = false, updatable = false)
+    @Temporal(TemporalType.TIMESTAMP)
     private Date createdAt;
 
     @Column(name = "updated_at", nullable = false)
+    @Temporal(TemporalType.TIMESTAMP)
     private Date updatedAt;
 
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(
-        name = "person_profile",
-        joinColumns = @JoinColumn(name = "person_id"),
-        inverseJoinColumns = @JoinColumn(name = "profile_id")
-    )
-    private Set<Profile> profiles = new HashSet<>();
+    @OneToMany(mappedBy = "person", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @Setter(value = AccessLevel.NONE)
+    private List<PersonProfile> personProfiles;
+
+    public void setPersonProfiles(List<PersonProfile> personProfiles) {
+        for (PersonProfile profile : personProfiles) {
+            profile.setPerson(this);
+        }
+
+        this.personProfiles = personProfiles;
+    }
 
     @PrePersist
     protected void onCreate() {
