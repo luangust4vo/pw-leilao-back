@@ -2,6 +2,15 @@ package com.github.luangust4vo.pw_leilao_backend.models;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Collection;
+import java.util.stream.Collectors;
+
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -27,7 +36,7 @@ import lombok.Setter;
 @Entity
 @Data
 @Table(name = "person")
-public class Person {
+public class Person implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -57,8 +66,8 @@ public class Person {
     private boolean isActive = false;
 
     @Lob
-    @Column(name = "perfil_image", nullable = true)
-    private byte[] perfilImage;
+    @Column(name = "profile_image", nullable = true)
+    private byte[] profileImage;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     @Temporal(TemporalType.TIMESTAMP)
@@ -78,6 +87,17 @@ public class Person {
         }
 
         this.personProfiles = personProfiles;
+    }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return personProfiles.stream().map(user -> new SimpleGrantedAuthority(user.getProfile().getType().name()))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public String getUsername() {
+        return this.email;
     }
 
     @PrePersist

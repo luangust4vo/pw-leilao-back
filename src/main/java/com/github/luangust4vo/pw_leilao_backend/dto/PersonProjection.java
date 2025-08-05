@@ -7,6 +7,6 @@ public interface PersonProjection {
     String getName();
     String getEmail();
     boolean getIsActive();
-    byte[] getPerfilImage();
+    byte[] getProfileImage();
     Date getCreatedAt();
 }

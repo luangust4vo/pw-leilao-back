@@ -5,6 +5,9 @@ import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.context.Context;
 
@@ -15,7 +18,7 @@ import com.github.luangust4vo.pw_leilao_backend.repositories.PersonRepository;
 import com.github.luangust4vo.pw_leilao_backend.utils.Const;
 
 @Service
-public class PersonService {
+public class PersonService implements UserDetailsService {
     @Autowired
     private PersonRepository personRepository;
     @Autowired
@@ -71,5 +74,11 @@ public class PersonService {
 
     public Page<PersonProjection> findAllPeople(Pageable pageable) {
         return personRepository.findAllPeople(pageable);
+    }
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        return personRepository.findByEmail(username)
+                .orElseThrow(() -> new UsernameNotFoundException("Pessoa não encontrada"));
     }
 }
