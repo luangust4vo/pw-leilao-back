@@ -1,5 +1,6 @@
 package com.github.luangust4vo.pw_leilao_backend.models;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Date;
 
@@ -67,12 +68,12 @@ public class Auction {
     @Column(name = "increment_value", nullable = false, precision = 10, scale = 2)
     @NotNull(message = "{validation.auction.increment-value.not-null}")
     @DecimalMin(value = "0.01", message = "{validation.auction.increment-value.min}")
-    private Double incrementValue;
+    private BigDecimal incrementValue;
     
     @Column(name = "minimum_bid", nullable = false, precision = 10, scale = 2)
     @NotNull(message = "{validation.auction.minimum-bid.not-null}")
     @DecimalMin(value = "0.01", message = "{validation.auction.minimum-bid.min}")
-    private Double minimumBid;
+    private BigDecimal minimumBid;
     
     @ManyToOne
     @JoinColumn(name = "category_id", nullable = false)
@@ -81,7 +82,6 @@ public class Auction {
     
     @ManyToOne
     @JoinColumn(name = "seller_id", nullable = false)
-    @NotNull(message = "{validation.auction.seller.not-null}")
     private Person seller;
     
     @Column(name = "created_at", nullable = false, updatable = false)

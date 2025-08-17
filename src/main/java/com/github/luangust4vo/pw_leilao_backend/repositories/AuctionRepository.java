@@ -33,4 +33,9 @@ public interface AuctionRepository extends JpaRepository<Auction, Long> {
     Page<Auction> findByCategoryAndStatus(@Param("category") Category category, 
                                          @Param("status") AuctionStatus status, 
                                          Pageable pageable);
+    
+    Page<Auction> findByStatusAndTitleContainingIgnoreCase(AuctionStatus status, String title, Pageable pageable);
+    Page<Auction> findByStatusAndDescriptionContainingIgnoreCase(AuctionStatus status, String description, Pageable pageable);
+    Page<Auction> findByStatusAndTitleContainingIgnoreCaseAndDescriptionContainingIgnoreCase(
+        AuctionStatus status, String title, String description, Pageable pageable);
 }

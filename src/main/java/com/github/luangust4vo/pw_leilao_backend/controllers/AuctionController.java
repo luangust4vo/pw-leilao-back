@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.github.luangust4vo.pw_leilao_backend.dto.ApiResponse;
 import com.github.luangust4vo.pw_leilao_backend.models.Auction;
 import com.github.luangust4vo.pw_leilao_backend.models.Category;
 import com.github.luangust4vo.pw_leilao_backend.models.Person;
@@ -35,7 +36,21 @@ public class AuctionController {
     private CategoryService categoryService;
 
     @GetMapping("/public")
-    public ResponseEntity<Page<Auction>> findOpenAuctions(Pageable pageable) {
+    public ResponseEntity<Page<Auction>> findOpenAuctions(
+            @RequestParam(required = false) Long categoryId,
+            @RequestParam(required = false) String title,
+            @RequestParam(required = false) String description,
+            Pageable pageable) {
+        
+        if (categoryId != null) {
+            Category category = categoryService.findById(categoryId);
+            return ResponseEntity.ok(auctionService.findByCategoryAndStatus(category, AuctionStatus.OPENED, pageable));
+        }
+        
+        if (title != null || description != null) {
+            return ResponseEntity.ok(auctionService.findOpenAuctionsWithFilters(title, description, pageable));
+        }
+        
         return ResponseEntity.ok(auctionService.findOpenAuctions(pageable));
     }
 
@@ -48,22 +63,25 @@ public class AuctionController {
         return ResponseEntity.notFound().build();
     }
 
-    @GetMapping("/public/category/{categoryId}")
-    public ResponseEntity<Page<Auction>> findOpenAuctionsByCategory(
-            @PathVariable("categoryId") Long categoryId, 
-            Pageable pageable) {
-        Category category = categoryService.findById(categoryId);
-        return ResponseEntity.ok(auctionService.findByCategoryAndStatus(category, AuctionStatus.OPENED, pageable));
-    }
-
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN') or hasRole('SELLER')")
-    public ResponseEntity<Page<Auction>> findAll(Pageable pageable) {
+    @PreAuthorize("hasAnyRole('SELLER', 'ADMIN')")
+    public ResponseEntity<Page<Auction>> findAll(
+            @RequestParam(required = false) Long categoryId,
+            @RequestParam(required = false) AuctionStatus status,
+            @RequestParam(required = false) String title,
+            @RequestParam(required = false) String description,
+            @RequestParam(required = false) Long sellerId,
+            Pageable pageable) {
+        
+        if (categoryId != null || status != null || title != null || description != null || sellerId != null) {
+            return ResponseEntity.ok(auctionService.findWithFilters(categoryId, status, title, description, sellerId, pageable));
+        }
+        
         return ResponseEntity.ok(auctionService.findAll(pageable));
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('SELLER')")
+    @PreAuthorize("hasAnyRole('SELLER', 'ADMIN')")
     public ResponseEntity<Auction> findById(@PathVariable("id") Long id) {
         return ResponseEntity.ok(auctionService.findById(id));
     }
@@ -76,16 +94,19 @@ public class AuctionController {
     }
 
     @PostMapping
-    @PreAuthorize("hasRole('SELLER')")
-    public ResponseEntity<Auction> create(@Valid @RequestBody Auction auction, Authentication authentication) {
+    @PreAuthorize("hasAnyRole('SELLER', 'ADMIN')")
+    public ResponseEntity<ApiResponse<Void>> create(@Valid @RequestBody Auction auction, Authentication authentication) {
         Person seller = (Person) authentication.getPrincipal();
         auction.setSeller(seller);
-        return ResponseEntity.ok(auctionService.create(auction));
+        auctionService.create(auction);
+        
+        return ResponseEntity.status(HttpStatus.CREATED)
+            .body(ApiResponse.sucesso("Leilão criado com sucesso! Aguardando aprovação do administrador."));
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('SELLER')")
-    public ResponseEntity<Auction> update(
+    @PreAuthorize("hasAnyRole('SELLER', 'ADMIN')")
+    public ResponseEntity<ApiResponse<Void>> update(
             @PathVariable("id") Long id, 
             @Valid @RequestBody Auction auction,
             Authentication authentication) {
@@ -93,50 +114,56 @@ public class AuctionController {
         Auction existingAuction = auctionService.findById(id);
         Person currentUser = (Person) authentication.getPrincipal();
         
-        if (!existingAuction.getSeller().getId().equals(currentUser.getId())) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        boolean isAdmin = currentUser.getPersonProfiles().stream()
+            .anyMatch(pp -> pp.getProfile().getType().name().equals("ROLE_ADMIN"));
+        
+        if (!isAdmin && !existingAuction.getSeller().getId().equals(currentUser.getId())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(ApiResponse.erro("Você não tem permissão para editar este leilão."));
         }
         
-        return ResponseEntity.ok(auctionService.update(id, auction));
+        auctionService.update(id, auction);
+        return ResponseEntity.ok(ApiResponse.sucesso("Leilão atualizado com sucesso!"));
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('SELLER')")
-    public ResponseEntity<Void> delete(@PathVariable("id") Long id, Authentication authentication) {
+    @PreAuthorize("hasAnyRole('SELLER', 'ADMIN')")
+    public ResponseEntity<ApiResponse<Void>> delete(@PathVariable("id") Long id, Authentication authentication) {
         Auction existingAuction = auctionService.findById(id);
         Person currentUser = (Person) authentication.getPrincipal();
         
-        if (!existingAuction.getSeller().getId().equals(currentUser.getId())) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        boolean isAdmin = currentUser.getPersonProfiles().stream()
+            .anyMatch(pp -> pp.getProfile().getType().name().equals("ROLE_ADMIN"));
+        
+        if (!isAdmin && !existingAuction.getSeller().getId().equals(currentUser.getId())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(ApiResponse.erro("Você não tem permissão para excluir este leilão."));
         }
         
         auctionService.delete(id);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok(ApiResponse.sucesso("Leilão excluído com sucesso!"));
     }
 
     @PostMapping("/{id}/approve")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Auction> approveAuction(@PathVariable("id") Long id) {
-        return ResponseEntity.ok(auctionService.approveAuction(id));
+    public ResponseEntity<ApiResponse<Void>> approveAuction(@PathVariable("id") Long id) {
+        auctionService.approveAuction(id);
+        return ResponseEntity.ok(ApiResponse.sucesso("Leilão aprovado e aberto para lances!"));
     }
 
     @PostMapping("/{id}/reject")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Auction> rejectAuction(
+    public ResponseEntity<ApiResponse<Void>> rejectAuction(
             @PathVariable("id") Long id,
             @RequestParam(required = false) String observation) {
-        return ResponseEntity.ok(auctionService.rejectAuction(id, observation));
+        auctionService.rejectAuction(id, observation);
+        return ResponseEntity.ok(ApiResponse.sucesso("Leilão rejeitado."));
     }
 
     @PostMapping("/{id}/close")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Auction> closeAuction(@PathVariable("id") Long id) {
-        return ResponseEntity.ok(auctionService.closeAuction(id));
-    }
-
-    @GetMapping("/status/{status}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Page<Auction>> findByStatus(@PathVariable("status") AuctionStatus status, Pageable pageable) {
-        return ResponseEntity.ok(auctionService.findByStatus(status, pageable));
+    public ResponseEntity<ApiResponse<Void>> closeAuction(@PathVariable("id") Long id) {
+        auctionService.closeAuction(id);
+        return ResponseEntity.ok(ApiResponse.sucesso("Leilão encerrado com sucesso!"));
     }
 }

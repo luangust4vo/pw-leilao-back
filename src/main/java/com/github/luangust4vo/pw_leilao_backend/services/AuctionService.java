@@ -113,6 +113,32 @@ public class AuctionService {
         return auctionRepository.findByCategoryAndStatus(category, status, pageable);
     }
 
+    public Page<Auction> findOpenAuctionsWithFilters(String title, String description, Pageable pageable) {
+        if (title != null && description != null) {
+            return auctionRepository.findByStatusAndTitleContainingIgnoreCaseAndDescriptionContainingIgnoreCase(
+                AuctionStatus.OPENED, title, description, pageable);
+        } else if (title != null) {
+            return auctionRepository.findByStatusAndTitleContainingIgnoreCase(AuctionStatus.OPENED, title, pageable);
+        } else if (description != null) {
+            return auctionRepository.findByStatusAndDescriptionContainingIgnoreCase(AuctionStatus.OPENED, description, pageable);
+        }
+        return findOpenAuctions(pageable);
+    }
+
+    public Page<Auction> findWithFilters(Long categoryId, AuctionStatus status, String title, String description, Long sellerId, Pageable pageable) {
+        Category category = categoryId != null ? categoryService.findById(categoryId) : null;
+        
+        if (category != null && status != null) {
+            return auctionRepository.findByCategoryAndStatus(category, status, pageable);
+        } else if (category != null) {
+            return auctionRepository.findByCategory(category, pageable);
+        } else if (status != null) {
+            return auctionRepository.findByStatus(status, pageable);
+        }
+        
+        return findAll(pageable);
+    }
+
     public Auction approveAuction(Long id) {
         Auction auction = findById(id);
         
@@ -169,7 +195,7 @@ public class AuctionService {
         }
         
         if (auction.getMinimumBid() != null && auction.getIncrementValue() != null) {
-            if (auction.getIncrementValue() > auction.getMinimumBid()) {
+            if (auction.getIncrementValue().compareTo(auction.getMinimumBid()) > 0) {
                 throw new BusinessException(
                     messageSource.getMessage("auction.increment-greater-than-minimum", null,
                             LocaleContextHolder.getLocale()));

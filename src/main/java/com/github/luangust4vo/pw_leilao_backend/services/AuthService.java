@@ -22,16 +22,12 @@ import com.github.luangust4vo.pw_leilao_backend.repositories.ProfileRepository;
 public class AuthService {
     @Autowired
     private AuthenticationManager authenticationManager;
-
     @Autowired
     private JwtService jwtService;
-
     @Autowired
     private PersonService personService;
-
     @Autowired
     private ProfileRepository profileRepository;
-
     @Autowired
     private PasswordEncoder passwordEncoder;
 
@@ -50,15 +46,25 @@ public class AuthService {
         person.setValidationCode(UUID.randomUUID().toString());
         person.setActive(true);
         
-        Profile defaultProfile = profileRepository.findByType(ProfileType.ROLE_BUYER)
-                .orElseThrow(() -> new RuntimeException("Perfil COMPRADOR não encontrado"));
-        
-        PersonProfile personProfile = new PersonProfile();
-        personProfile.setProfile(defaultProfile);
-        personProfile.setPerson(person);
-        
         List<PersonProfile> personProfiles = new ArrayList<>();
-        personProfiles.add(personProfile);
+        
+        List<Long> profileIds = personRequest.getProfileIds();
+        if (profileIds == null || profileIds.isEmpty()) {
+            Profile defaultProfile = profileRepository.findByType(ProfileType.ROLE_BUYER)
+                    .orElseThrow(() -> new RuntimeException("Perfil BUYER não encontrado"));
+            profileIds = List.of(defaultProfile.getId());
+        }
+        
+        for (Long profileId : profileIds) {
+            Profile profile = profileRepository.findById(profileId)
+                    .orElseThrow(() -> new RuntimeException("Perfil com ID " + profileId + " não encontrado"));
+            
+            PersonProfile personProfile = new PersonProfile();
+            personProfile.setProfile(profile);
+            personProfile.setPerson(person);
+            personProfiles.add(personProfile);
+        }
+        
         person.setPersonProfiles(personProfiles);
         
         Person savedPerson = personService.create(person);
