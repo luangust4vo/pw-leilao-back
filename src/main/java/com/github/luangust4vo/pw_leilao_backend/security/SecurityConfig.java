@@ -44,10 +44,10 @@ public class SecurityConfig {
         http.csrf(csrf -> csrf.disable())
              .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .authorizeHttpRequests(authorize -> authorize
-            .requestMatchers("/auth/**").permitAll()
+            .requestMatchers("/api/auth/**").permitAll()
             .requestMatchers("/category/**").permitAll()
-            .requestMatchers("/auction/public").permitAll()
-            /* .requestMatchers("/api/pessoa/**").hasRole("ADMIN") */
+            .requestMatchers("/api/auction/public").permitAll()
+            .requestMatchers("/api/people/**").hasRole("ADMIN")
                 .anyRequest().authenticated()
             )
             .sessionManagement(session -> session

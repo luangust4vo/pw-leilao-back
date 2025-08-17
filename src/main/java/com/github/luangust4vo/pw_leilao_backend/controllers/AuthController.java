@@ -20,4 +20,9 @@ public class AuthController {
     public String login(@RequestBody PersonRequestDTO person) {
         return authService.auth(person);
     }
+
+    @PostMapping("/register")
+    public String register(@RequestBody PersonRequestDTO person) {
+        return authService.register(person);
+    }
 }
