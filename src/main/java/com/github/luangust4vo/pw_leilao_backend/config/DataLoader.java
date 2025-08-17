@@ -2,7 +2,6 @@ package com.github.luangust4vo.pw_leilao_backend.config;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;

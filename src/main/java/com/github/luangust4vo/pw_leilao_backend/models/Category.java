@@ -6,6 +6,8 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 @Entity
@@ -18,8 +20,11 @@ public class Category {
     private Long id;
 
     @Column(name = "name", nullable = false, unique = true)
+    @NotBlank(message = "{validation.category.name.not-blank}")
+    @Size(max = 100, message = "{validation.category.name.size}")
     private String name;
 
     @Column(name = "observation")
+    @Size(max = 500, message = "{validation.category.observation.size}")
     private String observation;
 }
