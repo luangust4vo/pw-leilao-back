@@ -18,6 +18,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.github.luangust4vo.pw_leilao_backend.dto.ApiResponse;
+import com.github.luangust4vo.pw_leilao_backend.dto.AuctionDTO;
+import com.github.luangust4vo.pw_leilao_backend.exception.NotFoundException;
 import com.github.luangust4vo.pw_leilao_backend.models.Auction;
 import com.github.luangust4vo.pw_leilao_backend.models.Category;
 import com.github.luangust4vo.pw_leilao_backend.models.Person;
@@ -55,12 +57,13 @@ public class AuctionController {
     }
 
     @GetMapping("/public/{id}")
-    public ResponseEntity<Auction> findOpenAuctionById(@PathVariable("id") Long id) {
-        Auction auction = auctionService.findById(id);
-        if (auction.getStatus() == AuctionStatus.OPENED) {
+    public ResponseEntity<AuctionDTO> findOpenAuctionById(@PathVariable("id") Long id) {
+        try {
+            AuctionDTO auction = auctionService.findOpenAuctionByIdWithBids(id);
             return ResponseEntity.ok(auction);
+        } catch (NotFoundException e) {
+            return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.notFound().build();
     }
 
     @GetMapping
@@ -82,8 +85,9 @@ public class AuctionController {
 
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('SELLER', 'ADMIN')")
-    public ResponseEntity<Auction> findById(@PathVariable("id") Long id) {
-        return ResponseEntity.ok(auctionService.findById(id));
+    public ResponseEntity<AuctionDTO> findById(@PathVariable("id") Long id) {
+        AuctionDTO auction = auctionService.findByIdWithBids(id);
+        return ResponseEntity.ok(auction);
     }
 
     @GetMapping("/my-auctions")

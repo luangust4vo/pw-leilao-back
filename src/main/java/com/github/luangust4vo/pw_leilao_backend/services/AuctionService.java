@@ -10,6 +10,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import com.github.luangust4vo.pw_leilao_backend.dto.AuctionDTO;
+import com.github.luangust4vo.pw_leilao_backend.dto.BidResponseDTO;
 import com.github.luangust4vo.pw_leilao_backend.exception.BusinessException;
 import com.github.luangust4vo.pw_leilao_backend.exception.NotFoundException;
 import com.github.luangust4vo.pw_leilao_backend.models.Auction;
@@ -26,6 +28,8 @@ public class AuctionService {
     private MessageSource messageSource;
     @Autowired
     private CategoryService categoryService;
+    @Autowired
+    private BidService bidService;
 
     public List<Auction> findAll() {
         return auctionRepository.findAll();
@@ -205,5 +209,61 @@ public class AuctionService {
         if (auction.getCategory() != null && auction.getCategory().getId() != null) {
             categoryService.findById(auction.getCategory().getId());
         }
+    }
+    
+    // Métodos que retornam AuctionDTO com lances incluídos
+    public AuctionDTO findByIdWithBids(Long id) {
+        Auction auction = findById(id);
+        return convertToAuctionDTO(auction);
+    }
+    
+    public AuctionDTO findOpenAuctionByIdWithBids(Long id) {
+        Auction auction = findById(id);
+        if (auction.getStatus() != AuctionStatus.OPENED) {
+            throw new NotFoundException("Leilão não está aberto ou não encontrado");
+        }
+        return convertToAuctionDTO(auction);
+    }
+    
+    private AuctionDTO convertToAuctionDTO(Auction auction) {
+        // Buscar lances do leilão (limitando a 50 mais recentes)
+        List<BidResponseDTO> bids = bidService.findBidsByAuctionAsDTO(auction.getId(), 
+            org.springframework.data.domain.PageRequest.of(0, 50)).getContent();
+        
+        // Buscar maior lance
+        BidResponseDTO highestBid = bidService.findHighestBidAsDTO(auction.getId()).orElse(null);
+        
+        // Criar DTO
+        AuctionDTO dto = new AuctionDTO();
+        dto.setId(auction.getId());
+        dto.setTitle(auction.getTitle());
+        dto.setDescription(auction.getDescription());
+        dto.setDetailedDescription(auction.getDetailedDescription());
+        dto.setStartDateTime(auction.getStartDateTime());
+        dto.setEndDateTime(auction.getEndDateTime());
+        dto.setStatus(auction.getStatus());
+        dto.setObservation(auction.getObservation());
+        dto.setIncrementValue(auction.getIncrementValue());
+        dto.setMinimumBid(auction.getMinimumBid());
+        
+        // Categoria
+        dto.setCategory(new AuctionDTO.CategoryInfo(
+            auction.getCategory().getId(),
+            auction.getCategory().getName()
+        ));
+        
+        // Vendedor
+        dto.setSeller(new AuctionDTO.SellerInfo(
+            auction.getSeller().getId(),
+            auction.getSeller().getName()
+        ));
+        
+        // Lances
+        dto.setBids(bids);
+        dto.setHighestBid(highestBid);
+        dto.setNextMinimumBid(bidService.getNextMinimumBid(auction.getId()));
+        dto.setTotalBids(bidService.countBids(auction.getId()));
+        
+        return dto;
     }
 }

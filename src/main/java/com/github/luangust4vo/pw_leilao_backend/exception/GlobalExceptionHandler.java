@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 
+import com.github.luangust4vo.pw_leilao_backend.dto.ApiResponse;
 import com.github.luangust4vo.pw_leilao_backend.dto.ErrorResponse;
 
 @RestControllerAdvice
@@ -54,13 +55,8 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(BusinessException.class)
-    public ResponseEntity<ErrorResponse> businessException(BusinessException ex, WebRequest request) {
-        ErrorResponse errorResponse = new ErrorResponse(
-                HttpStatus.UNPROCESSABLE_ENTITY.value(),
-                "Business Rule Violation",
-                "Business rule violation",
-                request.getDescription(false),
-                null);
-        return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
+    public ResponseEntity<ApiResponse<Void>> businessException(BusinessException ex, WebRequest request) {
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
+            .body(ApiResponse.erro(ex.getMessage()));
     }
 }
