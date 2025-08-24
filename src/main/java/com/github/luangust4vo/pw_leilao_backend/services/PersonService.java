@@ -1,9 +1,13 @@
 package com.github.luangust4vo.pw_leilao_backend.services;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -11,7 +15,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.context.Context;
 
-import com.github.luangust4vo.pw_leilao_backend.dto.PersonProjection;
+import com.github.luangust4vo.pw_leilao_backend.dto.PersonResponseDTO;
 import com.github.luangust4vo.pw_leilao_backend.exception.NotFoundException;
 import com.github.luangust4vo.pw_leilao_backend.models.Person;
 import com.github.luangust4vo.pw_leilao_backend.repositories.PersonRepository;
@@ -65,15 +69,51 @@ public class PersonService implements UserDetailsService {
         personRepository.delete(existingPerson);
     }
 
-    public PersonProjection findPersonById(Long id) {
-        return personRepository.findPersonById(id)
+    public PersonResponseDTO findPersonById(Long id) {
+        Person person = personRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(
                         messageSource.getMessage("person.not-found", new Object[] { id },
                                 LocaleContextHolder.getLocale())));
+        return convertToPersonResponseDTO(person);
     }
 
-    public Page<PersonProjection> findAllPeople(Pageable pageable) {
-        return personRepository.findAllPeople(pageable);
+    public Page<PersonResponseDTO> findAllPeople(Pageable pageable) {
+        Page<Person> personPage = personRepository.findAll(pageable);
+        List<PersonResponseDTO> personDTOs = personPage.getContent().stream()
+                .map(this::convertToPersonResponseDTO)
+                .collect(Collectors.toList());
+        return new PageImpl<>(personDTOs, pageable, personPage.getTotalElements());
+    }
+
+    private PersonResponseDTO convertToPersonResponseDTO(Person person) {
+        PersonResponseDTO dto = new PersonResponseDTO();
+        dto.setId(person.getId());
+        dto.setName(person.getName());
+        dto.setEmail(person.getEmail());
+        dto.setActive(person.isActive());
+        dto.setProfileImage(person.getProfileImage());
+        dto.setCreatedAt(person.getCreatedAt());
+        
+        List<PersonResponseDTO.PersonProfileInfo> profileInfos = person.getPersonProfiles().stream()
+                .map(pp -> {
+                    PersonResponseDTO.PersonProfileInfo.ProfileInfo profileInfo = 
+                            new PersonResponseDTO.PersonProfileInfo.ProfileInfo(
+                                    pp.getProfile().getId(),
+                                    pp.getProfile().getType().name()
+                            );
+                    return new PersonResponseDTO.PersonProfileInfo(profileInfo);
+                })
+                .collect(Collectors.toList());
+        
+        dto.setPersonProfiles(profileInfos);
+        return dto;
+    }
+
+    public Person findByEmail(String email) {
+        return personRepository.findByEmail(email)
+                .orElseThrow(() -> new NotFoundException(
+                        messageSource.getMessage("person.not-found", new Object[] { email },
+                                LocaleContextHolder.getLocale())));
     }
 
     @Override

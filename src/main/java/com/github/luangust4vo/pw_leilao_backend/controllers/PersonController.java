@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.github.luangust4vo.pw_leilao_backend.models.Person;
 import com.github.luangust4vo.pw_leilao_backend.services.PersonService;
-import com.github.luangust4vo.pw_leilao_backend.dto.PersonProjection;
+import com.github.luangust4vo.pw_leilao_backend.dto.PersonResponseDTO;
 
 import jakarta.validation.Valid;
 
@@ -26,12 +26,12 @@ public class PersonController {
     private PersonService personService;
 
     @GetMapping
-    public ResponseEntity<Page<PersonProjection>> findAll(Pageable pageable) {
+    public ResponseEntity<Page<PersonResponseDTO>> findAll(Pageable pageable) {
         return ResponseEntity.ok(personService.findAllPeople(pageable));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<PersonProjection> findById(@PathVariable("id") Long id) {
+    public ResponseEntity<PersonResponseDTO> findById(@PathVariable("id") Long id) {
         return ResponseEntity.ok(personService.findPersonById(id));
     }
 
