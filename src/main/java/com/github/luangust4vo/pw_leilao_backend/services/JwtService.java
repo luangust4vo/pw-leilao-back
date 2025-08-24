@@ -51,6 +51,10 @@ public class JwtService {
         return claimsResolver.apply(claims);
     }
 
+    public long getExpirationTimeInSeconds() {
+        return this.expiration / 1000;
+    }
+
     private Claims extractAllClaims(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(key) 
