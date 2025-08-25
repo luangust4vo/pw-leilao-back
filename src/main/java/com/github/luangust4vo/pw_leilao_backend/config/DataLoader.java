@@ -46,9 +46,9 @@ public class DataLoader implements CommandLineRunner {
 
     private void initializeProfiles() {
         for (ProfileType profileType : ProfileType.values()) {
-            if (profileRepository.findByType(profileType).isEmpty()) {
+            if (profileRepository.findByType(profileType.name()).isEmpty()) {
                 Profile profile = new Profile();
-                profile.setType(profileType);
+                profile.setType(profileType.name());
                 profileRepository.save(profile);
             }
         }
@@ -83,7 +83,7 @@ public class DataLoader implements CommandLineRunner {
 
     private void initializeAdminUser() {
         if (personRepository.findByEmail(this.adminEmail).isEmpty()) {
-            Profile adminProfile = profileRepository.findByType(ProfileType.ROLE_ADMIN)
+            Profile adminProfile = profileRepository.findByType(ProfileType.ROLE_ADMIN.name())
                 .orElseThrow(() -> new RuntimeException("Perfil ADMIN não encontrado"));
             
             Person admin = new Person();

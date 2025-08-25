@@ -55,7 +55,7 @@ public class AuthService {
         
         List<Long> profileIds = personRequest.getProfileIds();
         if (profileIds == null || profileIds.isEmpty()) {
-            Profile defaultProfile = profileRepository.findByType(ProfileType.ROLE_BUYER)
+            Profile defaultProfile = profileRepository.findByType(ProfileType.ROLE_BUYER.name())
                     .orElseThrow(() -> new RuntimeException("Perfil BUYER não encontrado"));
             profileIds = List.of(defaultProfile.getId());
         }
@@ -91,7 +91,7 @@ public class AuthService {
                 .stream()
                 .map(pp -> new AuthResponseDTO.UserInfoDTO.ProfileInfoDTO(
                         pp.getProfile().getId(),
-                        pp.getProfile().getType().name()
+                        pp.getProfile().getType()
                 ))
                 .collect(Collectors.toList());
         

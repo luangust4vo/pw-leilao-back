@@ -34,8 +34,11 @@ public class ProfileController {
         return ResponseEntity.ok(profileService.create(profile));
     }
 
-    @PutMapping
-    public ResponseEntity<Profile> update(@Valid @RequestBody Profile profile) {
+    @PutMapping("/{id}")
+    public ResponseEntity<Profile> update(@PathVariable("id") long id, @Valid @RequestBody Profile newProfile) {
+        Profile profile = profileService.findById(id);
+        profile.setType(newProfile.getType());
+        
         return ResponseEntity.ok(profileService.update(profile));
     }
 

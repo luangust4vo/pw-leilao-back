@@ -119,7 +119,7 @@ public class AuctionController {
         Person currentUser = (Person) authentication.getPrincipal();
         
         boolean isAdmin = currentUser.getPersonProfiles().stream()
-            .anyMatch(pp -> pp.getProfile().getType().name().equals("ROLE_ADMIN"));
+            .anyMatch(pp -> pp.getProfile().getType().equals("ROLE_ADMIN"));
         
         if (!isAdmin && !existingAuction.getSeller().getId().equals(currentUser.getId())) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
@@ -137,7 +137,7 @@ public class AuctionController {
         Person currentUser = (Person) authentication.getPrincipal();
         
         boolean isAdmin = currentUser.getPersonProfiles().stream()
-            .anyMatch(pp -> pp.getProfile().getType().name().equals("ROLE_ADMIN"));
+            .anyMatch(pp -> pp.getProfile().getType().equals("ROLE_ADMIN"));
         
         if (!isAdmin && !existingAuction.getSeller().getId().equals(currentUser.getId())) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)

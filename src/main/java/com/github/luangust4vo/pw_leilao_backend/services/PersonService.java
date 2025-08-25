@@ -99,7 +99,7 @@ public class PersonService implements UserDetailsService {
                     PersonResponseDTO.PersonProfileInfo.ProfileInfo profileInfo = 
                             new PersonResponseDTO.PersonProfileInfo.ProfileInfo(
                                     pp.getProfile().getId(),
-                                    pp.getProfile().getType().name()
+                                    pp.getProfile().getType()
                             );
                     return new PersonResponseDTO.PersonProfileInfo(profileInfo);
                 })

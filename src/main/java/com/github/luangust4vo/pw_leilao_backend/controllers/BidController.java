@@ -28,7 +28,6 @@ public class BidController {
     @Autowired
     private BidService bidService;
 
-    // GET /api/auctions/{auction_id}/bids - Listar lances do leilão (público)
     @GetMapping("/api/auctions/{auctionId}/bids")
     public ResponseEntity<Page<BidResponseDTO>> getBidsByAuction(
             @PathVariable("auctionId") Long auctionId,
@@ -36,7 +35,6 @@ public class BidController {
         return ResponseEntity.ok(bidService.findBidsByAuctionAsDTO(auctionId, pageable));
     }
 
-    // POST /api/auctions/{auction_id}/bids - Criar lance
     @PostMapping("/api/auctions/{auctionId}/bids")
     @PreAuthorize("hasAnyRole('BUYER', 'SELLER')")
     public ResponseEntity<ApiResponse<Void>> placeBid(
@@ -51,7 +49,6 @@ public class BidController {
             .body(ApiResponse.sucesso("Lance realizado com sucesso!"));
     }
 
-    // PUT /api/auctions/{auction_id}/bids/{bid_id} - Atualizar lance
     @PutMapping("/api/auctions/{auctionId}/bids/{bidId}")
     @PreAuthorize("hasAnyRole('BUYER', 'SELLER')")
     public ResponseEntity<ApiResponse<Void>> updateBid(
@@ -66,7 +63,6 @@ public class BidController {
         return ResponseEntity.ok(ApiResponse.sucesso("Lance atualizado com sucesso!"));
     }
 
-    // DELETE /api/auctions/{auction_id}/bids/{bid_id} - Excluir lance
     @DeleteMapping("/api/auctions/{auctionId}/bids/{bidId}")
     @PreAuthorize("hasAnyRole('BUYER', 'SELLER')")
     public ResponseEntity<ApiResponse<Void>> deleteBid(
@@ -80,7 +76,6 @@ public class BidController {
         return ResponseEntity.ok(ApiResponse.sucesso("Lance excluído com sucesso!"));
     }
 
-    // GET /api/users/my-bids - Meus lances
     @GetMapping("/api/users/my-bids")
     @PreAuthorize("hasAnyRole('BUYER', 'SELLER')")
     public ResponseEntity<Page<BidResponseDTO>> getMyBids(Authentication authentication, Pageable pageable) {

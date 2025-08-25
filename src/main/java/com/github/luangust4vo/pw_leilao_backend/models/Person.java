@@ -88,7 +88,7 @@ public class Person implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return personProfiles.stream().map(user -> new SimpleGrantedAuthority(user.getProfile().getType().name()))
+        return personProfiles.stream().map(user -> new SimpleGrantedAuthority(user.getProfile().getType()))
                 .collect(Collectors.toList());
     }
 
