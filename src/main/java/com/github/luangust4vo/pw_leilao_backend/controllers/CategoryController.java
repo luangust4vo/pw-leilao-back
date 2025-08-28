@@ -1,7 +1,7 @@
 package com.github.luangust4vo.pw_leilao_backend.controllers;
 
-import java.util.List;
-
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,8 +28,8 @@ public class CategoryController {
     private CategoryService categoryService;
 
     @GetMapping
-    public ResponseEntity<List<Category>> findAll() {
-        return ResponseEntity.ok(categoryService.findAll());
+    public ResponseEntity<Page<Category>> findAll(Pageable page) {
+        return ResponseEntity.ok(categoryService.findAll(page));
     }
 
     @GetMapping("/{id}")
