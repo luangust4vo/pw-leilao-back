@@ -1,7 +1,7 @@
 package com.github.luangust4vo.pw_leilao_backend.models;
 
-import java.util.Date;
 import java.util.List;
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
@@ -57,7 +57,7 @@ public class Person implements UserDetails {
 
     @Column(name = "validation_code_expiration", nullable = true)
     @Temporal(TemporalType.TIMESTAMP)
-    private Date validationCodeExpiration;
+    private LocalDateTime validationCodeExpiration;
 
     @Column(name = "is_active", nullable = false)
     private boolean isActive = false;
@@ -68,11 +68,11 @@ public class Person implements UserDetails {
 
     @Column(name = "created_at", nullable = false, updatable = false)
     @Temporal(TemporalType.TIMESTAMP)
-    private Date createdAt;
+    private LocalDateTime createdAt;
 
     @Column(name = "updated_at", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
-    private Date updatedAt;
+    private LocalDateTime updatedAt;
 
     @OneToMany(mappedBy = "person", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @Setter(value = AccessLevel.NONE)
@@ -99,13 +99,13 @@ public class Person implements UserDetails {
 
     @PrePersist
     protected void onCreate() {
-        Date now = new Date();
+        LocalDateTime now = LocalDateTime.now();
         this.createdAt = now;
         this.updatedAt = now;
     }
 
     @PreUpdate
     protected void onUpdate() {
-        updatedAt = new Date();
+        updatedAt = LocalDateTime.now();
     }
 }

@@ -3,9 +3,11 @@ package com.github.luangust4vo.pw_leilao_backend.controllers;
 import java.security.Principal;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.github.luangust4vo.pw_leilao_backend.dto.AuthResponseDTO;
@@ -24,12 +26,17 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public AuthResponseDTO register(@RequestBody PersonRequestDTO person) {
-        return authService.register(person);
+    public void register(@RequestBody PersonRequestDTO person) {
+        authService.register(person);
     }
 
     @PostMapping("/refresh")
     public AuthResponseDTO refresh(Principal principal) {
         return authService.refreshToken(principal.getName());
+    }
+
+    @GetMapping("/verify-account")
+    public AuthResponseDTO verifyAccount(@RequestParam("code") String code) {
+        return authService.verifyAccount(code);
     }
 }

@@ -1,6 +1,6 @@
 package com.github.luangust4vo.pw_leilao_backend.dto;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import lombok.AllArgsConstructor;
@@ -16,7 +16,7 @@ public class PersonResponseDTO {
     private String email;
     private boolean isActive;
     private byte[] profileImage;
-    private Date createdAt;
+    private LocalDateTime createdAt;
     private List<PersonProfileInfo> personProfiles;
     
     @Data

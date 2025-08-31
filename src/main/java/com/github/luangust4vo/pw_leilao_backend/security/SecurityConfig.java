@@ -53,7 +53,7 @@ public class SecurityConfig {
         http.csrf(csrf -> csrf.disable())
              .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .authorizeHttpRequests(authorize -> authorize
-            .requestMatchers("/api/auth/login", "/api/auth/register").permitAll()
+            .requestMatchers("/api/auth/login", "/api/auth/register", "/api/auth/verify-account").permitAll()
             .requestMatchers(HttpMethod.GET, "/api/categories/**").permitAll()
             .requestMatchers(HttpMethod.GET, "/api/profiles").permitAll()
             .requestMatchers(HttpMethod.GET, "/api/auctions/public/**").permitAll()

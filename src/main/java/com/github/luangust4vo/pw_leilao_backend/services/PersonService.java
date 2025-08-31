@@ -13,13 +13,11 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-import org.thymeleaf.context.Context;
 
 import com.github.luangust4vo.pw_leilao_backend.dto.PersonResponseDTO;
 import com.github.luangust4vo.pw_leilao_backend.exception.NotFoundException;
 import com.github.luangust4vo.pw_leilao_backend.models.Person;
 import com.github.luangust4vo.pw_leilao_backend.repositories.PersonRepository;
-import com.github.luangust4vo.pw_leilao_backend.utils.Const;
 
 @Service
 public class PersonService implements UserDetailsService {
@@ -27,14 +25,6 @@ public class PersonService implements UserDetailsService {
     private PersonRepository personRepository;
     @Autowired
     private MessageSource messageSource;
-    @Autowired
-    private EmailService emailService;
-
-    private void sendSuccessEmail(Person person) {
-        Context context = new Context(LocaleContextHolder.getLocale());
-        context.setVariable("name", person.getName());
-        emailService.emailTemplate(person.getEmail(), "Cadastrado com sucesso", Const.templateSuccessRegister, context);
-    }
 
     public Person findById(Long id) {
         return personRepository.findById(id)
@@ -49,8 +39,6 @@ public class PersonService implements UserDetailsService {
 
     public Person create(Person person) {
         Person newPerson = personRepository.save(person);
-        sendSuccessEmail(newPerson);
-
         return newPerson;
     }
 

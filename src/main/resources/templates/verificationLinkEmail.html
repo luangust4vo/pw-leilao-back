@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <style>
+        .button {
+            background-color: #3b82f6;
+            color: white;
+            padding: 14px 25px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            border-radius: 8px;
+            font-family: sans-serif;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Olá, <span th:text="${name}"></span>!</h1>
+    <p>Obrigado por se registrar no nosso sistema de leilão.</p>
+    <p>Para ativar sua conta, por favor, clique no botão abaixo:</p>
+
+    <a th:href="${verificationLink}" class="button">Ativar Minha Conta</a>
+
+    <p style="margin-top: 20px;">Este link irá expirar em 24 horas.</p>
+    <p>Se você não se registrou, por favor, ignore este e-mail.</p>
+</body>
+
+</html>

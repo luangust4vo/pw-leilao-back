@@ -15,4 +15,6 @@ public interface PersonRepository extends JpaRepository<Person, Long> {
     public Page<Person> findByEmail(@Param("email") String email, Pageable pageable);
 
     public Optional<Person> findByEmail(String email);
+
+    Optional<Person> findByValidationCode(String validationCode);
 }

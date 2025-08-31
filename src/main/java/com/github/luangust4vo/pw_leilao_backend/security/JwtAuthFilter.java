@@ -36,7 +36,12 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
             token = authorizationHeader.substring(7);
-            username = jwtService.extractUsername(token);
+
+            try {
+                username = jwtService.extractUsername(token);
+            } catch (Exception e) {
+                logger.warn("Erro ao processar o token JWT: {}", e);
+            }
         }
 
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
