@@ -6,6 +6,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.lang.NonNull;
 
 import com.github.luangust4vo.pw_leilao_backend.services.JwtService;
 import com.github.luangust4vo.pw_leilao_backend.services.PersonService;
@@ -27,7 +28,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     private PersonService personService;
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
+    protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull FilterChain chain)
             throws ServletException, IOException {
         String authorizationHeader = request.getHeader("Authorization");
         String token = null;
@@ -48,6 +49,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }
         }
+        
         chain.doFilter(request, response);
     }
 }
