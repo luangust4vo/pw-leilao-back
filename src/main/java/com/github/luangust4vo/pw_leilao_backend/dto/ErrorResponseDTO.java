@@ -6,7 +6,7 @@ import java.util.List;
 import lombok.Data;
 
 @Data
-public class ErrorResponse {
+public class ErrorResponseDTO {
     private LocalDateTime dateTime;
     private int code;
     private String error;
@@ -14,7 +14,7 @@ public class ErrorResponse {
     private String path;
     private List<String> details;
 
-    public ErrorResponse(int code, String error, String message, String path, List<String> details) {
+    public ErrorResponseDTO(int code, String error, String message, String path, List<String> details) {
         this.dateTime = LocalDateTime.now();
         this.code = code;
         this.error = error;

@@ -10,53 +10,37 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 
-import com.github.luangust4vo.pw_leilao_backend.dto.ApiResponse;
-import com.github.luangust4vo.pw_leilao_backend.dto.ErrorResponse;
+import com.github.luangust4vo.pw_leilao_backend.dto.ApiResponseDTO;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorResponse> validationException(MethodArgumentNotValidException ex,
+    public ResponseEntity<ApiResponseDTO<List<String>>> validationException(MethodArgumentNotValidException ex,
             WebRequest request) {
         List<String> errorDetails = ex.getBindingResult()
                 .getFieldErrors()
                 .stream()
                 .map(error -> error.getField() + ": " + error.getDefaultMessage()).collect(Collectors.toList());
 
-        ErrorResponse errorResponse = new ErrorResponse(
-                HttpStatus.BAD_REQUEST.value(),
-                "Validation Error",
-                "One or more validation errors occurred",
-                request.getDescription(false),
-                errorDetails);
-        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ApiResponseDTO.erro("Erro de Validação", errorDetails));
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponse> globalHandleException(Exception ex, WebRequest request) {
-        ErrorResponse errorResponse = new ErrorResponse(
-                HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                "Internal Server Error",
-                ex.getMessage(),
-                request.getDescription(false),
-                null);
-        return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+    public ResponseEntity<ApiResponseDTO<Void>> globalHandleException(Exception ex, WebRequest request) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(ApiResponseDTO.erro("Erro Interno do Servidor: " + ex.getMessage()));
     }
 
     @ExceptionHandler(NotFoundException.class)
-    public ResponseEntity<ErrorResponse> notFoundException(NotFoundException ex, WebRequest request) {
-        ErrorResponse errorResponse = new ErrorResponse(
-                HttpStatus.NOT_FOUND.value(),
-                "Internal Server Error",
-                "Resource not found",
-                request.getDescription(false),
-                null);
-        return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
+    public ResponseEntity<ApiResponseDTO<Void>> notFoundException(NotFoundException ex, WebRequest request) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(ApiResponseDTO.erro(ex.getMessage()));
     }
 
     @ExceptionHandler(BusinessException.class)
-    public ResponseEntity<ApiResponse<Void>> businessException(BusinessException ex, WebRequest request) {
+    public ResponseEntity<ApiResponseDTO<Void>> businessException(BusinessException ex, WebRequest request) {
         return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
-            .body(ApiResponse.erro(ex.getMessage()));
+            .body(ApiResponseDTO.erro(ex.getMessage()));
     }
 }

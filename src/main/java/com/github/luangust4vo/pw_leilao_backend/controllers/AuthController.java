@@ -15,7 +15,6 @@ import com.github.luangust4vo.pw_leilao_backend.services.AuthService;
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
-
     @Autowired
     private AuthService authService;
 
