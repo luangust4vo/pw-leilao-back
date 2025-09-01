@@ -18,7 +18,9 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.thymeleaf.context.Context;
 
 import com.github.luangust4vo.pw_leilao_backend.dto.AuthResponseDTO;
+import com.github.luangust4vo.pw_leilao_backend.dto.PasswordResetRequestDTO;
 import com.github.luangust4vo.pw_leilao_backend.dto.PersonRequestDTO;
+import com.github.luangust4vo.pw_leilao_backend.dto.UpdatePasswordRequestDTO;
 import com.github.luangust4vo.pw_leilao_backend.exception.BusinessException;
 import com.github.luangust4vo.pw_leilao_backend.exception.NotFoundException;
 import com.github.luangust4vo.pw_leilao_backend.models.Person;
@@ -127,6 +129,50 @@ public class AuthService {
 
         String token = jwtService.generateToken(person.getEmail());
         return createAuthResponse(token, person);
+    }
+
+    public void requestPasswordReset(PasswordResetRequestDTO request) {
+        personRepository.findByEmail(request.getEmail()).ifPresent(person -> {
+            person.setValidationCode(UUID.randomUUID().toString());
+            person.setValidationCodeExpiration(LocalDateTime.now().plusMinutes(15));
+            personRepository.save(person);
+            sendPasswordResetEmail(person);
+        });
+    }
+
+    public void verifyPasswordResetCode(String code) {
+        Person person = personRepository.findByValidationCode(code)
+                .orElseThrow(() -> new BusinessException("Código de verificação inválido ou expirado."));
+        
+        if (person.getValidationCodeExpiration().isBefore(LocalDateTime.now())) {
+            throw new BusinessException("Código de verificação inválido ou expirado.");
+        }
+    }
+
+    public void updatePassword(UpdatePasswordRequestDTO request) {
+        verifyPasswordResetCode(request.getCode());
+
+        Person person = personRepository.findByValidationCode(request.getCode()).get();
+
+        person.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        person.setValidationCode(null);
+        person.setValidationCodeExpiration(null);
+        personRepository.save(person);
+    }
+
+    private void sendPasswordResetEmail(Person person) {
+        String verificationLink = "http://localhost:5173/verify-reset-code?code=" + person.getValidationCode();
+
+        Context context = new Context(LocaleContextHolder.getLocale());
+        context.setVariable("name", person.getName());
+        context.setVariable("verificationLink", verificationLink);
+        
+        emailService.emailTemplate(
+            person.getEmail(), 
+            "Redefinição de Senha", 
+            "passwordResetEmail", // Novo template
+            context
+        );
     }
 
     private void sendVerificationEmail(Person person) {
