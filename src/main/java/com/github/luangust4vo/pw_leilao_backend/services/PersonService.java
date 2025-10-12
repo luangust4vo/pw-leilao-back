@@ -47,6 +47,9 @@ public class PersonService implements UserDetailsService {
 
         existingPerson.setName(person.getName());
         existingPerson.setEmail(person.getEmail());
+        existingPerson.setActive(person.isActive());
+        existingPerson.setProfileImage(person.getProfileImage());
+        existingPerson.setPersonProfiles(person.getPersonProfiles());
 
         return personRepository.save(existingPerson);
     }

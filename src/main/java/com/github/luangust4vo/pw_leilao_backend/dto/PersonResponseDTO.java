@@ -15,7 +15,7 @@ public class PersonResponseDTO {
     private String name;
     private String email;
     private boolean isActive;
-    private byte[] profileImage;
+    private String profileImage;
     private LocalDateTime createdAt;
     private List<PersonProfileInfo> personProfiles;
     

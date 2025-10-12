@@ -64,7 +64,7 @@ public class Person implements UserDetails {
 
     @Lob
     @Column(name = "profile_image", nullable = true)
-    private byte[] profileImage;
+    private String profileImage;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     @Temporal(TemporalType.TIMESTAMP)
