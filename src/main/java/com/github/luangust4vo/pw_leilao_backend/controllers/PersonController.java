@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.github.luangust4vo.pw_leilao_backend.models.Person;
 import com.github.luangust4vo.pw_leilao_backend.services.PersonService;
 import com.github.luangust4vo.pw_leilao_backend.dto.PersonResponseDTO;
+import com.github.luangust4vo.pw_leilao_backend.dto.UpdatePersonRequestDTO;
 
 import jakarta.validation.Valid;
 
@@ -40,9 +41,9 @@ public class PersonController {
         return ResponseEntity.ok(personService.create(person));
     }
 
-    @PutMapping
-    public ResponseEntity<Person> update(@Valid @RequestBody Person person) {
-        return ResponseEntity.ok(personService.update(person));
+    @PutMapping("/{id}")
+    public ResponseEntity<Person> update(@PathVariable("id") Long id, @RequestBody UpdatePersonRequestDTO updatePersonRequestDTO) {
+        return ResponseEntity.ok(personService.update(id, updatePersonRequestDTO));
     }
 
     @DeleteMapping("/{id}")

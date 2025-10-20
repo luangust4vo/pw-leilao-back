@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -58,7 +59,8 @@ public class AuthService {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(personRequest.getEmail(), personRequest.getPassword()));
 
-        String token = jwtService.generateToken(authentication.getName());
+        var userDetails = (UserDetails) authentication.getPrincipal();
+        String token = jwtService.generateToken(userDetails);
         
         return createAuthResponse(token, person);
     }
@@ -103,9 +105,9 @@ public class AuthService {
     }
 
     public AuthResponseDTO refreshToken(String email) {
-        String newToken = jwtService.generateToken(email);
-        
         Person person = personService.findByEmail(email);
+        
+        String newToken = jwtService.generateToken(person);
         
         return createAuthResponse(newToken, person);
     }
@@ -125,9 +127,9 @@ public class AuthService {
         person.setActive(true);
         person.setValidationCode(null);
         person.setValidationCodeExpiration(null);
-        personService.update(person);
+        personRepository.save(person);
 
-        String token = jwtService.generateToken(person.getEmail());
+        String token = jwtService.generateToken(person);
         return createAuthResponse(token, person);
     }
 
