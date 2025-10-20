@@ -5,28 +5,28 @@ import org.springframework.stereotype.Service;
 
 import com.github.luangust4vo.pw_leilao_backend.dto.AvatarRequestDTO;
 import com.github.luangust4vo.pw_leilao_backend.models.Person;
+import com.github.luangust4vo.pw_leilao_backend.repositories.PersonRepository;
 
 @Service
 public class ImageService {
     @Autowired
     private CloudinaryService cloudinaryService;
     @Autowired
-    private PersonService personService;
+    private PersonRepository personRepository;
 
     public String uploadAvatar(AvatarRequestDTO request, String folder) {
         try {
             String imageUrl = cloudinaryService.uploadFile(request.getFile(), folder);
-            Person user = personService.findById(request.getUserId());
+            Person user = personRepository.findById(request.getUserId())
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
 
             user.setProfileImage(imageUrl);
-            personService.update(user);
+            personRepository.save(user);
 
             return imageUrl;
         } catch (Exception e) {
             e.printStackTrace();
             return null;
         }
-
-
     }
 }

@@ -15,6 +15,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import com.github.luangust4vo.pw_leilao_backend.dto.PersonResponseDTO;
+import com.github.luangust4vo.pw_leilao_backend.dto.UpdatePersonRequestDTO;
 import com.github.luangust4vo.pw_leilao_backend.exception.NotFoundException;
 import com.github.luangust4vo.pw_leilao_backend.models.Person;
 import com.github.luangust4vo.pw_leilao_backend.repositories.PersonRepository;
@@ -42,14 +43,10 @@ public class PersonService implements UserDetailsService {
         return newPerson;
     }
 
-    public Person update(Person person) {
-        Person existingPerson = this.findById(person.getId());
+    public Person update(Long id, UpdatePersonRequestDTO updatePersonRequestDTO) {
+        Person existingPerson = this.findById(id);
 
-        existingPerson.setName(person.getName());
-        existingPerson.setEmail(person.getEmail());
-        existingPerson.setActive(person.isActive());
-        existingPerson.setProfileImage(person.getProfileImage());
-        existingPerson.setPersonProfiles(person.getPersonProfiles());
+        existingPerson.setName(updatePersonRequestDTO.getName());
 
         return personRepository.save(existingPerson);
     }
