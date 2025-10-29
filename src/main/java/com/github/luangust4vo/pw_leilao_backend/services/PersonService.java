@@ -5,6 +5,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -12,10 +13,13 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.github.luangust4vo.pw_leilao_backend.dto.ChangePasswordRequestDTO;
 import com.github.luangust4vo.pw_leilao_backend.dto.PersonResponseDTO;
 import com.github.luangust4vo.pw_leilao_backend.dto.UpdatePersonRequestDTO;
+import com.github.luangust4vo.pw_leilao_backend.exception.BusinessException;
 import com.github.luangust4vo.pw_leilao_backend.exception.NotFoundException;
 import com.github.luangust4vo.pw_leilao_backend.models.Person;
 import com.github.luangust4vo.pw_leilao_backend.repositories.PersonRepository;
@@ -26,6 +30,9 @@ public class PersonService implements UserDetailsService {
     private PersonRepository personRepository;
     @Autowired
     private MessageSource messageSource;
+    @Autowired
+    @Lazy
+    private PasswordEncoder passwordEncoder;
 
     public Person findById(Long id) {
         return personRepository.findById(id)
@@ -55,6 +62,12 @@ public class PersonService implements UserDetailsService {
         Person existingPerson = this.findById(id);
 
         personRepository.delete(existingPerson);
+    }
+
+    public void changeStatus(Long id, boolean active) {
+        Person existingPerson = this.findById(id);
+        existingPerson.setActive(active);
+        personRepository.save(existingPerson);
     }
 
     public PersonResponseDTO findPersonById(Long id) {
@@ -102,6 +115,19 @@ public class PersonService implements UserDetailsService {
                 .orElseThrow(() -> new NotFoundException(
                         messageSource.getMessage("person.not-found", new Object[] { email },
                                 LocaleContextHolder.getLocale())));
+    }
+
+    public void changePassword(Person person, ChangePasswordRequestDTO dto) {
+        if (!passwordEncoder.matches(dto.getCurrentPassword(), person.getPassword())) {
+            throw new BusinessException("A senha atual está incorreta."); 
+        }
+
+        if (passwordEncoder.matches(dto.getNewPassword(), person.getPassword())) {
+            throw new BusinessException("A nova senha não pode ser igual à antiga.");
+        }
+
+        person.setPassword(passwordEncoder.encode(dto.getNewPassword()));
+        personRepository.save(person);
     }
 
     @Override
