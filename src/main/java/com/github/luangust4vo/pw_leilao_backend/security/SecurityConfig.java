@@ -54,11 +54,12 @@ public class SecurityConfig {
              .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .authorizeHttpRequests(authorize -> authorize
             .requestMatchers("/api/auth/login", "/api/auth/register", "/api/auth/verify-account", "/api/auth/forgot-password", "/api/auth/verify-reset-code", 
-                             "/api/auth/reset-password", "api/people/me").permitAll()
+                             "/api/auth/reset-password").permitAll()
             .requestMatchers(HttpMethod.GET, "/api/categories/**").permitAll()
             .requestMatchers(HttpMethod.GET, "/api/profiles").permitAll()
             .requestMatchers(HttpMethod.GET, "/api/auctions/public/**").permitAll()
             .requestMatchers(HttpMethod.GET, "/api/auctions/*/bids").permitAll()
+            .requestMatchers("/api/people/me/**").authenticated() 
             .requestMatchers("/api/people/**").hasRole("ADMIN")
                 .anyRequest().authenticated()
             )
