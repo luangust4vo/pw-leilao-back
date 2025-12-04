@@ -3,9 +3,11 @@ package com.github.luangust4vo.pw_leilao_backend.models;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.List;
 
 import com.github.luangust4vo.pw_leilao_backend.models.enums.AuctionStatus;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -15,6 +17,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
@@ -83,6 +86,9 @@ public class Auction {
     @ManyToOne
     @JoinColumn(name = "seller_id", nullable = false)
     private Person seller;
+
+    @OneToMany(mappedBy = "auction", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Image> images;
     
     @Column(name = "created_at", nullable = false, updatable = false)
     @Temporal(TemporalType.TIMESTAMP)
@@ -91,6 +97,13 @@ public class Auction {
     @Column(name = "updated_at", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
     private Date updatedAt;
+
+    public void setImages(List<Image> images) {
+        if (images != null) {
+            images.forEach(img -> img.setAuction(this));
+        }
+        this.images = images;
+    }
 
     @PrePersist
     protected void onCreate() {
