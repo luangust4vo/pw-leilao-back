@@ -17,20 +17,13 @@ public class PersonResponseDTO {
     private boolean isActive;
     private String profileImage;
     private LocalDateTime createdAt;
-    private List<PersonProfileInfo> personProfiles;
+    private List<ProfileInfoDTO> profiles;
     
     @Data
-    @AllArgsConstructor
     @NoArgsConstructor
-    public static class PersonProfileInfo {
-        private ProfileInfo profile;
-        
-        @Data
-        @AllArgsConstructor
-        @NoArgsConstructor
-        public static class ProfileInfo {
-            private Long id;
-            private String type;
-        }
+    @AllArgsConstructor
+    public static class ProfileInfoDTO {
+        private Long id;
+        private String type;
     }
 }

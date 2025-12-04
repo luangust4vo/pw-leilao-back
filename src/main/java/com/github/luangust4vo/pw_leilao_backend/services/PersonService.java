@@ -22,12 +22,17 @@ import com.github.luangust4vo.pw_leilao_backend.dto.UpdatePersonRequestDTO;
 import com.github.luangust4vo.pw_leilao_backend.exception.BusinessException;
 import com.github.luangust4vo.pw_leilao_backend.exception.NotFoundException;
 import com.github.luangust4vo.pw_leilao_backend.models.Person;
+import com.github.luangust4vo.pw_leilao_backend.models.PersonProfile;
+import com.github.luangust4vo.pw_leilao_backend.models.Profile;
 import com.github.luangust4vo.pw_leilao_backend.repositories.PersonRepository;
+import com.github.luangust4vo.pw_leilao_backend.repositories.ProfileRepository;
 
 @Service
 public class PersonService implements UserDetailsService {
     @Autowired
     private PersonRepository personRepository;
+    @Autowired
+    private ProfileRepository profileRepository;
     @Autowired
     private MessageSource messageSource;
     @Autowired
@@ -70,6 +75,25 @@ public class PersonService implements UserDetailsService {
         personRepository.save(existingPerson);
     }
 
+    public PersonResponseDTO addProfile(Person person, String profileType) {
+        boolean hasProfile = person.getPersonProfiles().stream()
+                .anyMatch(pp -> pp.getProfile().getType().equals(profileType));
+
+        if (!hasProfile) {
+            Profile profile = profileRepository.findByType(profileType)
+                    .orElseThrow(() -> new NotFoundException("Perfil não encontrado: " + profileType));
+
+            PersonProfile pp = new PersonProfile();
+            pp.setPerson(person);
+            pp.setProfile(profile);
+            
+            person.getPersonProfiles().add(pp);
+            personRepository.save(person);
+        }
+        
+        return convertToPersonResponseDTO(person);
+    }
+
     public PersonResponseDTO findPersonById(Long id) {
         Person person = personRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(
@@ -95,18 +119,14 @@ public class PersonService implements UserDetailsService {
         dto.setProfileImage(person.getProfileImage());
         dto.setCreatedAt(person.getCreatedAt());
         
-        List<PersonResponseDTO.PersonProfileInfo> profileInfos = person.getPersonProfiles().stream()
-                .map(pp -> {
-                    PersonResponseDTO.PersonProfileInfo.ProfileInfo profileInfo = 
-                            new PersonResponseDTO.PersonProfileInfo.ProfileInfo(
-                                    pp.getProfile().getId(),
-                                    pp.getProfile().getType()
-                            );
-                    return new PersonResponseDTO.PersonProfileInfo(profileInfo);
-                })
+        List<PersonResponseDTO.ProfileInfoDTO> profileInfos = person.getPersonProfiles().stream()
+                .map(pp -> new PersonResponseDTO.ProfileInfoDTO(
+                        pp.getProfile().getId(),
+                        pp.getProfile().getType()
+                ))
                 .collect(Collectors.toList());
         
-        dto.setPersonProfiles(profileInfos);
+        dto.setProfiles(profileInfos);
         return dto;
     }
 

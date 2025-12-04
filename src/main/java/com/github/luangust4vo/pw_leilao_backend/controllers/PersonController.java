@@ -18,6 +18,7 @@ import com.github.luangust4vo.pw_leilao_backend.services.PersonService;
 import com.github.luangust4vo.pw_leilao_backend.dto.ApiResponseDTO;
 import com.github.luangust4vo.pw_leilao_backend.dto.ChangePasswordRequestDTO;
 import com.github.luangust4vo.pw_leilao_backend.dto.UpdatePersonRequestDTO;
+import com.github.luangust4vo.pw_leilao_backend.dto.UpdateProfileTypeDTO;
 
 import jakarta.validation.Valid;
 
@@ -73,5 +74,10 @@ public class PersonController {
     public ResponseEntity<?> changeMyPassword(@AuthenticationPrincipal Person loggedInUser, @Valid @RequestBody ChangePasswordRequestDTO dto) {
         personService.changePassword(loggedInUser, dto);
         return ResponseEntity.ok(ApiResponseDTO.sucesso("Senha alterada com sucesso."));
+    }
+
+    @PutMapping("/me/become-seller")
+    public ResponseEntity<?> becomeSeller(@AuthenticationPrincipal Person loggedInUser, @RequestBody UpdateProfileTypeDTO dto) {
+        return ResponseEntity.ok(personService.addProfile(loggedInUser, dto.getProfileType()));
     }
 }
