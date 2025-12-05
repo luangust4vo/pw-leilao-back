@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.github.luangust4vo.pw_leilao_backend.models.enums.AuctionStatus;
 
 import jakarta.persistence.CascadeType;
@@ -89,6 +90,10 @@ public class Auction {
 
     @OneToMany(mappedBy = "auction", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Image> images;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "auction")
+    private List<Bid> bids;
     
     @Column(name = "created_at", nullable = false, updatable = false)
     @Temporal(TemporalType.TIMESTAMP)

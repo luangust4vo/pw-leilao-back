@@ -25,12 +25,15 @@ public class AuctionResponseDTO {
     private AuctionStatus status;
     private BigDecimal incrementValue;
     private BigDecimal minimumBid;
+    private BigDecimal nextBid;
+    private BigDecimal currentBid;
     private String categoryName;
     private Long categoryId;
     private String sellerName;
     private Long sellerId;
     private List<String> imageUrls;
     private String coverImage;
+    private Integer bidCount;
 
     public static AuctionResponseDTO fromEntity(Auction auction) {
         AuctionResponseDTO dto = new AuctionResponseDTO();
@@ -43,6 +46,17 @@ public class AuctionResponseDTO {
         dto.setStatus(auction.getStatus());
         dto.setIncrementValue(auction.getIncrementValue());
         dto.setMinimumBid(auction.getMinimumBid());
+
+        int count = (auction.getBids() != null) ? auction.getBids().size() : 0;
+        dto.setBidCount(count);
+
+        dto.setNextBid(auction.getMinimumBid());
+
+        if (count > 0) {
+            dto.setCurrentBid(auction.getMinimumBid().subtract(auction.getIncrementValue()));
+        } else {
+            dto.setCurrentBid(auction.getMinimumBid());
+        }
         
         if (auction.getCategory() != null) {
             dto.setCategoryName(auction.getCategory().getName());
